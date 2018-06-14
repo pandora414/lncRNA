@@ -4,18 +4,21 @@
 nextflow pipeline for lncRNA
 
 #### 软件架构
-软件架构说明
+The pipeline is built using Nextflow, a bioinformatics workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
 
 
 #### 安装教程
 
-1. xxxx
-2. xxxx
-3. xxxx
+1. 安装Nextflow
+2. 安装Docker
+3. 安装Anaconda2
 
 #### 使用说明
 
-1. xxxx
+1. Run Test
+
+> nextflow run dggene/lncRNA
+
 2. xxxx
 3. xxxx
 
