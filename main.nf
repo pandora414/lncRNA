@@ -11,8 +11,8 @@ database="/DG/database/genomes/Homo_sapiens/hg19"
 
 process fastqc{
     tag { sample_name }
-    //container 'biocontainers/fastqc'
-    conda "fastqc"
+    container 'biocontainers/fastqc'
+    //conda "fastqc"
     publishDir { "output/fastqc/"+ sample_name }
     input:
         set sample_name,files from samples0
