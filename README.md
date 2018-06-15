@@ -9,9 +9,47 @@ The pipeline is built using Nextflow, a bioinformatics workflow tool to run task
 
 #### 安装教程
 
-1. 安装Nextflow
-2. 安装Docker
-3. 安装Anaconda2
+1. 安装jdk-1.8 
+2. 安装Nextflow
+3. 安装Docker
+4. 安装Anaconda2
+
+操作系统要求：centos7 
+
+yum install java-1.8.0-openjdk wget
+
+wget -qO- https://get.nextflow.io | bash
+
+#### Docker依赖
+##### Docker安装
+> curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+##### 配置docker国内加速器
+    mkdir -p /etc/docker
+    tee /etc/docker/daemon.json <<-'EOF'
+    {
+    "registry-mirrors": ["https://rppkjtdx.mirror.aliyuncs.com"]
+    }
+    EOF
+    systemctl daemon-reload
+    systemctl restart docker
+    
+##### Anaconda2
+
+wget -qO - https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda2-5.2.0-Linux-x86_64.sh|bash
+
+在安装目录下：/opt/anaconda2 新建 .condarc ,填入如下内容
+
+    channels:
+      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
+      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/
+      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
+      - defaults
+    show_channel_urls: true
+
 
 #### 使用说明
 
