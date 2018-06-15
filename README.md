@@ -4,7 +4,10 @@
 nextflow pipeline for lncRNA
 
 #### 软件架构
-The pipeline is built using Nextflow, a bioinformatics workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
+该流程使用Nextflow开发，主要用于lncRNA分析。
+
+nextflow 是一个生物信息流程搭建工具，具有原生支持多并发、支持docker、conda，解决了生物信息分析中最麻烦的软件环境部署问题。
+
 
 
 #### 安装教程
@@ -19,6 +22,8 @@ The pipeline is built using Nextflow, a bioinformatics workflow tool to run task
 yum install java-1.8.0-openjdk wget
 
 wget -qO- https://get.nextflow.io | bash
+
+nextflow 学习文档 https://www.nextflow.io/docs/latest/getstarted.html
 
 #### Docker依赖
 ##### Docker安装
@@ -35,7 +40,7 @@ wget -qO- https://get.nextflow.io | bash
     
 ##### Anaconda2
 
-wget -qO - https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda2-5.2.0-Linux-x86_64.sh|bash
+    wget -qO - https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda2-5.2.0-Linux-x86_64.sh|bash
 
 在安装目录下：/opt/anaconda2 新建 .condarc ,填入如下内容
 
@@ -53,11 +58,31 @@ wget -qO - https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda2-5.2.0
 
 #### 使用说明
 
-1. Run Test
+1. Run
 
-> nextflow run dggene/lncRNA
 
-2. xxxx
+    nextflow run dggene/lncRNA --data-file=xxxx/data.ini
+
+Example data.ini
+
+    [sample]
+    HL=HL.left.fq.gz|HL.right.fq.gz
+    
+    [group]
+    group1=sample1,sample2
+    group2=sample2,sample3
+  
+数据配置文件为标准的ini格式，其中sample分组表示需要分析的样本信息，格式为 name=path1|path2,name为样本名称，path为样本路径
+，路径可以是绝对路径也可以相对路径，如果是相对路径，则是相对于data.ini文件的路径
+
+2. 流程更新
+
+    当对流程做了更新以后，需要通知生信人员及时更新本地克隆的分支，方式如下：
+    
+    
+    nextflow pull dggene/lncRNA
+    
+
 3. xxxx
 
 #### 参与贡献
@@ -66,13 +91,3 @@ wget -qO - https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda2-5.2.0
 2. 新建 Feat_xxx 分支
 3. 提交代码
 4. 新建 Pull Request
-
-
-#### 码云特技
-
-1. 使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2. 码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3. 你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4. [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5. 码云官方提供的使用手册 [http://git.mydoc.io/](http://git.mydoc.io/)
-6. 码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
