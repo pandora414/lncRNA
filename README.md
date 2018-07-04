@@ -91,3 +91,16 @@ Example data.ini
 2. 新建 Feat_xxx 分支
 3. 提交代码
 4. 新建 Pull Request
+
+#### 参考资料
+biocontainer 常见的生物信息镜像
+https://biocontainers.pro/registry/#/
+
+bio.tools 收集了常见的生物信息分析软件，提供在线文档
+https://bio.tools
+
+docker 提供软件运行的环境，可以把每个软件打包为镜像，每个镜像可以理解为一个个集装箱，那么搭建一个分析流程的过程就是装配这些集装箱的过程 
+https://www.docker.com/
+
+anaconda 原本是提供一个python的发行版本，内含了大量的科学运算包，可以快速进行软件的安装
+https://anaconda.org/
