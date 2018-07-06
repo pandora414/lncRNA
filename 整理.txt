@@ -1,0 +1,92 @@
+outdir = /DG/project1/RNA-Barchydanioreriovar-20171201-14
+database=/DG/database/genomes/Danio_rerio/z10
+///////////////////////////////////////
+fastqc:
+fastqc --extract -o $outdir/fastqc/$sample.name [% IF sample.library_type == "se" %] $sample.path.0 [% ELSE %] $sample.path.0 $sample.path.1 [% END %]
+
+///////////////////////////////////////
+SOAPnuke: 
+
+if file.size£¨£© == 1
+
+	/DG/home/yut/soft/SOAPnuke filter -1 $outDir/rRNA/${sample.name}_1.fq.gz -l 20 -q 0.5 -Q ...
+	2 -G -f GATCGGAAGAGCACACGTCTGAACTCCAGTCAC -r GATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT ...
+	-o $outDir/filter$sample.name -C ${sample.name}.clean.fastq.gz 
+else
+	
+	/DG/home/yut/soft/SOAPnuke filter -1 $outDir/rRNA/${sample.name}_1.fq.gz -2 $dir.rRNA/${sample.name}_2.fq.gz ...
+	-l 20 -q 0.5 -Q 2 -G -f GATCGGAAGAGCACACGTCTGAACTCCAGTCAC -r GATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT ...
+	-o $outDir/filter/$sample.name -C ${sample.name}_1.clean.fq.gz -D ${sample.name}_2.clean.fq.gz 
+
+
+///////////////////////////////////////
+hisat_aln:
+if [ ! -d $dir.hisat/$sample.name ]; then mkdir $dir.hisat/$sample.name 
+
+if file.size£¨£© == 1
+	
+	/DG/home/wangy/software/hisat2-2.1.0/hisat2 -x /DG/home/qkun/database/Genomes/z10/hisat_index/z10 ...
+	-U $outDir/filter/$sample.name/${sample.name}.clean.fq.gz
+else
+
+	/DG/home/wangy/software/hisat2-2.1.0/hisat2 -x /DG/home/qkun/database/Genomes/z10/hisat_index/z10 ...
+	-1 $outDir/filter/$sample.name/${sample.name}_1.clean.fq.gz -2 $outDir/filter/$sample.name/${sample.name}_2.clean.fq.gz
+	-S $outDir/hisat/$sample.name/${sample.name}.sam 2> $outDir/hisat/$sample.name/${sample.name}.align_summary.txt
+
+after...
+
+samtools view -bS $dir.hisat/$sample.name/${sample.name}.sam > $dir.hisat/$sample.name/${sample.name}_unsorted.bam <br/>
+samtools sort -@ 8 $dir.hisat/$sample.name/${sample.name}_unsorted.bam $dir.hisat/$sample.name/${sample.name} <br/>
+samtools index $dir.hisat/$sample.name/${sample.name}.bam $dir.hisat/$sample.name/${sample.name}.bam.bai <br/>
+
+python $tools.RSeQC/inner_distance.py -i $dir.hisat/$sample.name/${sample.name}.bam -o $dir.hisat/$sample.name/$sample.name -r $config.bed <br/>\
+python $tools.RSeQC/read_distribution.py -i $dir.hisat/$sample.name/${sample.name}.bam -r $config.bed > $dir.hisat/$sample.name/${sample.name}.read_distribution.txt<br/>\
+convert -density 300 $dir.hisat/$sample.name/${sample.name}.inner_distance_plot.pdf -resize 25% $dir.hisat/$sample.name/${sample.name}.inner_distance_plot.png <br/>\
+python $tools.RSeQC/infer_experiment.py -i $dir.hisat/$sample.name/${sample.name}.bam -r $config.bed > $dir.hisat/$sample.name/${sample.name}.strand_distribution.txt<br/>\
+python $tools.RSeQC/geneBody_coverage.py -i $dir.hisat/$sample.name/${sample.name}.bam -r $config.bed -o $dir.hisat/$sample.name/$sample.name<br/>\
+convert -density 300 $dir.hisat/$sample.name/${sample.name}.geneBodyCoverage.curves.pdf -resize 25% $dir.hisat/$sample.name/${sample.name}.geneBodyCoverage.curves.png<br/>\
+python $tools.RSeQC/RPKM_saturation.py -i $dir.hisat/$sample.name/${sample.name}.bam -r $config.bed -o $dir.hisat/$sample.name/${sample.name}.50bin -q 10 -s 2 -l 2<br/>\
+perl /DG/home/qkun/bin/denovo_bin/expr/saturation.pl $config.gene2tr $dir.hisat/$sample.name/${sample.name}.50bin.eRPKM.xls $sample.name $dir.hisat/$sample.name/${sample.name}.genenumber.txt<br/>\
+convert -density 300 $dir.hisat/$sample.name/${sample.name}.saturation.pdf -resize 25% $dir.hisat/$sample.name/${sample.name}.saturation.png<br/>\
+
+///////////////////////////////////////
+htseq:
+
+htseq-count -f bam -m union -s yes -t exon -i gene_id -r pos $outDir/hisat/$sample.name/${sample.name}.bam ...
+$database/Ensembl_annot/Danio_rerio.GRCz10.89.chr.gtf>$outDir/exp/${sample.name}.rawCount.txt
+
+///////////////////////////////////////
+expstat:
+
+cat $outDir/exp/*.rpkm.tmp > $outDir/exp/all.rpkm.xls.tmp
+
+///////////////////////////////////////
+edge£º
+
+name2=group.control
+
+if name2.match(",")
+	
+	perl /DG/home/yut/soft/trinityrnaseq_r20140413p1/Analysis/DifferentialExpression/run_DE_analysis.pl ...
+	--matrix $outDir/diffs/${group.name}.rawCount.xls --method edgeR --output $outDir/diff...
+	--samples_file $outDir/diff/${group.name}.samp.list 
+else
+
+	perl /DG/home/yut/soft/trinityrnaseq_r20140413p1/Analysis/DifferentialExpression/run_DE_analysis.pl ...
+	--matrix $outDir/diff//${group.name}.rawCount.xls --method edgeR --output $outDir/diff...
+	--dispersion 0.05
+
+
+///////////////////////////////////////
+GO:
+
+perl /DG/home/yut/pipeline/RNA-seq/pipeline_2.0/functional/functional.pl -go -glist $outDir/diff ...
+GO/${group.name}.glist -sdir $database/GO -species Danio_rerio -outdir $outDir/diff/GO
+
+///////////////////////////////////////
+kegg:
+
+python /DG/programs/beta/rel/kobas-3.0/src/annotate.py -i $outDir/diff/${group.name}.sigdiff.kobas.glist ...
+-t id:ensembl -s dre -y /DG/database/pub/KOBAS/3.0/seq_pep -q /DG/database/pub/KOBAS/3.0/sqlite3/ 
+-p /DG/programs/beta/rel/ncbi-blast-2.2.28+/bin/blastp -x /DG/programs/beta/rel/ncbi-blast-2.2.28+/bin/blastx...
+-o $outDir/diff/KEGG/${group.name}.sigdiff.kobas.annot -n 4
