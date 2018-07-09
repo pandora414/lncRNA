@@ -32,7 +32,7 @@ class Config {
         def res=[]
         for(item in sec){
             item.each{
-                res.add([it.key,it.value.split(',')])
+                res.add([it.key,it.value.split(',')[0],it.value.split(',')[1],it.value.split(',')])
             }
         }
         return res
