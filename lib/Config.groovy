@@ -1,8 +1,58 @@
 import IniParser
+
+class Item implements  GroovyInterceptable{
+    public String name=""
+    String default_value=""
+
+    protected dynamicProps = [:]
+    void setProperty(String pName, val) {
+        dynamicProps[pName] = val
+    }
+
+    def getProperty(String pName) {
+        dynamicProps[pName]
+    }
+
+    def methodMissing(String name, def args) {
+        println "Missing method"
+    }
+
+    Item(name,value){
+        this.name=name
+        for(_item in value){
+            _item.each{
+                setProperty(it.key,it.value)
+            }
+        }
+    }
+}
+
+
+
+class Section {
+    String name=""
+    int count=0
+    def items=new ArrayList<Item>()
+
+    public Section(name,sec){
+        this.name=name
+        Item item=null
+        for(_item in sec){
+            _item.each{
+                item=new Item(it.key,it.value)
+                print(item.name)
+                items.add(item)
+            }
+        }
+    }
+}
+
+
+
 class Config {
-    def filename;
-    def ini=null;
-    def data_dir=null;
+    def filename=""
+    def ini=null
+    def data_dir=null
     Config(filename){
         this.filename=filename
         ini=new IniParser(filename)
@@ -38,9 +88,15 @@ class Config {
         return res
     }
 
+    def ReadSection(String section_name){
+        def sec=ini.getSection(section_name)
+        Section s=new Section(section_name,sec)
+        return s
+    }
+
     static void main(String[] args) {
-        def config=new Config('config.ini')
-        config.ReadSamples()
-        config.ReadGroups()
+        def config=new Config('test/data.ini')
+        def s=config.ReadSection('sample')
+        println(s.items[0].name)
     }
 }

@@ -44,12 +44,14 @@ nextflow 学习文档 https://www.nextflow.io/docs/latest/getstarted.html
 
 在安装目录下：/opt/anaconda2 新建 .condarc ,填入如下内容
 
+由于r包的安装主要依赖bioconda，所以bioconda和conda-forge的源需要放在最前面，不然会报缺少库文件的错误
+
     channels:
+      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
+      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
       - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
       - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
-      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
       - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
-      - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
       - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/
       - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
       - defaults
