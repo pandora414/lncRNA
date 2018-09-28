@@ -57,6 +57,60 @@ nextflow 学习文档 https://www.nextflow.io/docs/latest/getstarted.html
       - defaults
     show_channel_urls: true
 
+####配置nfs
+    
+
+    yum install nfs-utils -y
+    mkdir -p  /DG/home/ /DG/project0 /DG/rawdata  /DG/project1 /DG/programs /DG/database
+
+/etc/fstab 写入一下内容
+
+    172.16.0.51:/home         /DG/home/       nfs4     defaults  0       0
+    172.16.0.51:/data1        /DG/project0    nfs4     defaults  0       0
+    172.16.0.51:/rawdata      /DG/rawdata     nfs4     defaults  0       0
+    172.16.0.51:/project1     /DG/project1    nfs4     defaults  0       0
+    172.16.0.51:/backup     /DG/backup      nfs4    defaults        0       0
+    172.16.0.51:/programs   /DG/programs    nfs4    defaults        0       0
+    172.16.0.51:/database2 /DG/database     nfs4    defaults        0       0
+
+
+####配置ldap
+
+    yum install -y nss-pam* 
+    authconfig-tui
+
+    
+    ┌────────────────┤ Authentication Configuration ├─────────────────┐
+    │                                                                 │
+    │  User Information        Authentication                         │
+    │  [*] Cache Information   [*] Use MD5 Passwords                  │
+    │  [*] Use LDAP            [*] Use Shadow Passwords               │
+    │  [ ] Use NIS             [*] Use LDAP Authentication            │
+    │  [ ] Use IPAv2           [ ] Use Kerberos                       │
+    │  [ ] Use Winbind         [ ] Use Fingerprint reader             │
+    │                          [ ] Use Winbind Authentication         │
+    │                          [*] Local authorization is sufficient  │
+    │                                                                 │
+    │            ┌────────┐                      ┌──────┐             │
+    │            │ Cancel │                      │ Next │             │
+    │            └────────┘                      └──────┘             │
+    │                                                                 │
+    │                                                                 │
+    └─────────────────────────────────────────────────────────────────┘
+
+    Server: ldap://172.16.0.210_
+    Base DN: dc=dg,dc=com
+
+####安装pbs mom
+    echo /usr/local/lib > /etc/ld.so.conf.d/local.conf
+    ldconfig
+    sh torque-package-mom-linux-x86_64.sh
+    echo node210.DG > /var/spool/torque/server_name
+    cp /DG/programs/stable/src/torque-4.2.6.1/contrib/init.d/pbs_mom /etc/init.d
+    systemctl enable pbs_mom
+    systemctl restart pbs_mom
+
+
 
 #### 使用说明
 
