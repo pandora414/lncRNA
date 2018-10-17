@@ -96,6 +96,7 @@ nextflow 学习文档 https://www.nextflow.io/docs/latest/getstarted.html
     Base DN: dc=dg,dc=com
 
 ####安装pbs mom  本地测试可省略，主要用于集群运行
+
     echo /usr/local/lib > /etc/ld.so.conf.d/local.conf
     ldconfig
     sh torque-package-mom-linux-x86_64.sh
