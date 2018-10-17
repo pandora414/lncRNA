@@ -1,0 +1,29 @@
+vars.tmp <- commandArgs(T)
+vars <- vars.tmp[length(vars.tmp)]
+split.vars <- unlist(strsplit(vars,','))
+input =split.vars[1]
+name = split.vars[2]
+out1=split.vars[3]
+out2=split.vars[4]
+
+qc <- read.delim(input,header=F)
+
+library(ggplot2)
+
+qc=as.matrix(qc)
+color=c("#1874CD","#CD3333","#9ACD32","#CD6889")
+df=data.frame(qc,color)
+df=df[order(df[,1]),]
+pdf(out1)
+pie <- ggplot(df, aes(x = "", y = as.numeric(as.character(V2)), fill = V1))
+ pie=pie+ geom_bar(width = 1, stat = "identity", position="fill")+theme(axis.ticks=element_blank())
+ pie= pie+ coord_polar("y") + labs(title = paste("Classification of Raw Reads(",name,")",sep=''),fill='')+xlab('')+ylab('')
+ pie+scale_fill_manual( values =as.character(df$color))
+dev.off()
+
+png(out2,width = 600, height = 500)
+ pie <- ggplot(df, aes(x = "", y = as.numeric(as.character(V2)), fill = V1))
+ pie=pie+ geom_bar(width = 1, stat = "identity", position="fill")+theme(axis.ticks=element_blank())
+ pie= pie+ coord_polar("y") + labs(title = paste("Classification of Raw Reads(",name,")",sep=''),fill='')+xlab('')+ylab('')
+ pie+scale_fill_manual( values =as.character(df$color))
+dev.off()

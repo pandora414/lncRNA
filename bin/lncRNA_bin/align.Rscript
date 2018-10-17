@@ -1,0 +1,55 @@
+vars.tmp <- commandArgs(T)
+vars <- vars.tmp[length(vars.tmp)]
+split.vars <- unlist(strsplit(vars,','))
+input =split.vars[1]
+name = split.vars[2]
+out1=split.vars[3]
+out2=split.vars[4]
+
+align <- read.delim(input,header=F)
+library(ggplot2)
+library(grid)
+
+align=align[order(align[,2], decreasing = TRUE),]
+myLabel = as.vector(align[,1])
+myLabel = paste(myLabel, sep = "")
+myLabel1 = paste(round( align[,2] / sum(align[,2]) * 100, 2), "%", sep = "")
+
+pdf(out1)
+pie = ggplot(align, aes(x = "", y = align[,2], fill = align[,1])) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(x = "", y = "", title = "") +
+  theme_bw()+
+  theme(panel.border=element_blank())+
+  theme(axis.ticks = element_blank()) +
+  theme(legend.margin=unit(-6.4,"cm")) +
+  theme(plot.margin=unit(c(-2,-0.5,2.8,-1.5),units="cm")) +
+  theme(legend.title = element_blank(),legend.position = "bottom",legend.text=element_text(size=15,face='bold')) +
+  theme(panel.grid=element_blank())+
+  scale_fill_manual(values=c("#7EC0EE","#F08080","#D8BFD8","#9BCD9B"),breaks = as.character(align[,1]), labels = myLabel) +
+  theme(axis.text.x = element_blank()) +
+  geom_text(aes(y =sum(align[,2]), x = 1.7, label = (paste("Reads Distribution(",name,")",sep=''))), size = 6) +
+  geom_text(aes(y = V2/2 + c(0, cumsum(align[,2])[-length(align[,2])]), x = c(1.0,1.2,1.2,1.4), label = myLabel1), size = 6)
+pie
+dev.off()
+
+png(out2,width=480,height=480)
+pie = ggplot(align, aes(x = "", y = align[,2], fill = align[,1])) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(x = "", y = "", title = "") +
+  theme_bw()+
+  theme(panel.border=element_blank())+
+  theme(axis.ticks = element_blank()) +
+  theme(legend.margin=unit(-6.4,"cm")) +
+  theme(plot.margin=unit(c(-2,-0.5,2.8,-1.5),units="cm")) +
+  theme(legend.title = element_blank(),legend.position = "bottom",legend.text=element_text(size=15,face='bold')) +
+  theme(panel.grid=element_blank())+
+  scale_fill_manual(values=c("#7EC0EE","#F08080","#D8BFD8","#9BCD9B"),breaks = as.character(align[,1]), labels = myLabel) +
+  theme(axis.text.x = element_blank()) +
+  geom_text(aes(y =sum(align[,2]), x = 1.7, label = (paste("Reads Distribution(",name,")",sep=''))), size = 6) +
+  geom_text(aes(y = V2/2 + c(0, cumsum(align[,2])[-length(align[,2])]), x = c(1.0,1.2,1.2,1.4), label = myLabel1), size = 6)
+pie
+dev.off()
+

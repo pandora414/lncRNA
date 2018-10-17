@@ -2,7 +2,6 @@ class Main {
     static void main(String[] args) {
         def ini = new IniParser("test/data.ini")
         ini.dumpConfig()
-        println(ini.src)
         def secs = ini.getAllSections()
         secs.each() { it ->
             println it
@@ -17,11 +16,9 @@ class IniParser {
     String section = ""
     boolean inSection = false;
     def match = null;
-    int line_no=0
     IniParser(filename) {
         src = new File(filename)
         src.eachLine { line ->
-            line_no++
             if(line=~'^#'){
                 return
             }
@@ -31,18 +28,25 @@ class IniParser {
                 section = sec
                 config[section] = [:]
             }
-            line.find(/\s*(\w+)\.?(\w+)?\s*=\s*(.*)?(?:#|$)/) {full, key,attr, value ->
-
+            line.find(/\s*(\S+)\s*=\s*(.*)?(?:#|$)/) {full, key, value ->
                 if (config.get(section).containsKey(key)) {
-                    def attrs = config.get(section).get(key)
-                    attrs.put(attr,value)
-                } else {
-                    if (attr){
-                        throw new Exception('error config file,miss key main value! line=\n'+line)
+                    def v = config.get(section).get(key)
+                    if (v in Collection) {
+                        def oldVal = config.get(section).get(key)
+                        oldVal.add(value)
+                        config[key] = oldVal
+                        config.get(section).put(key, oldVal)
+                    } else {
+                        def values = new ArrayList<String>();
+                        values.add(v)
+                        values.add(value)
+                        config.get(section).put(key, values)
                     }
-                    def attrs=[_value:value]
-                    config.get(section).put(key, attrs)
+                } else {
+                    config.get(section).put(key, value)
                 }
+                // println "Match: $full, Key: $key, Value: $value"
+                // config.get(section).put(key, value)
             }
         }
     }

@@ -30,7 +30,8 @@ database： 与人hg19相关的数据、工具存储的目录
 opd： output pathway本项目的输出文件母目录 
 -------------------------------------------------------------------------*/
 database="/DG/database/genomes/Homo_sapiens/hg19"
-opd =  "/home/zhangbing/lncRNA2/output"
+database_kobas="/DG/database/pub/KOBAS/"
+opd =  "${workflow.launchDir}/output"
 
 /*-------------------------读取样本及定义组---------------------------------
 
@@ -273,7 +274,7 @@ process htseq_xls{
     script:
     """
         echo \$PWD
-        perl /DG/home/qkun/bin/RNAseq_bin/htseq2rpkm_hisat.pl txt_files \
+        perl $baseDir/bin/RNAseq_bin/htseq2rpkm_hisat.pl txt_files \
         $database/Ensembl_annot/hg19.GRCh37.74.ncRNA.gene.len \
         sample.rawCount.txt $sample_name ${sample_name}.rpkm.xls
 	    sed 's/^/$sample_name\t/' ${sample_name}.rpkm.xls | sed '1d' > ${sample_name}.rpkm.tmp
@@ -298,6 +299,7 @@ sigDiff_xls copy to sigDiff_xls0|sigDiff_xls1
 
 2、测试例中HL_1与HL为相同文件，固输出的差异文件为空，这在后续操作会报错，所以我们在这里用printf写入几行数据
 -------------------------------------------------------------------------*/
+htseq_txt1.collectFile(name:'hisat2.txt').into{htseq_collect}
 process edgeR{
     tag { group_name }
     //container 'registry.cn-hangzhou.aliyuncs.com/bio/hisat2'
@@ -305,7 +307,7 @@ process edgeR{
     //conda "perl=5.26.2 bioconductor-edger=3.20.7"
     publishDir {"output/group/" + group_name}
     input:
-        //set sample_name , file('sample.rawCount.txt') from htseq_txt1
+        set sample_name , file('sample.rawCount.txt') from htseq_collect
         set group_name , control_name , case_name, file('sample_files') from groups0
     output:
         set group_name , file("${group_name}.sigDiff.glist") into sigDiff_glist
@@ -318,14 +320,14 @@ process edgeR{
         
         cp $opd/htseq/$control_name/${control_name}.rawCount.txt input_dir/${control_name}.rawCount.txt
         cp $opd/htseq/$case_name/${case_name}.rawCount.txt input_dir/${case_name}.rawCount.txt
-        perl /DG/home/wangy/process_upgrading/lncRNA-human/lncRNA_bin/mergeHtseq.pl input_dir $control_name $case_name $control_name $case_name $group_name output_dir
-        perl /DG/home/yut/soft/trinityrnaseq_r20140413p1/Analysis/DifferentialExpression/run_DE_analysis.pl --matrix output_dir/${group_name}.rawCount.xls \
+        perl $baseDir/bin/lncRNA_bin/mergeHtseq.pl input_dir $control_name $case_name $control_name $case_name $group_name output_dir
+        perl $baseDir/bin/run_DE_analysis.pl --matrix output_dir/${group_name}.rawCount.xls \
         --method edgeR --output output_dir --dispersion 0.05
-        perl /DG/home/wangy/process_upgrading/lncRNA-human/lncRNA_bin/extract_sigDiffGene.pl \
+        perl $baseDir/bin/lncRNA_bin/extract_sigDiffGene.pl \
         output_dir/${group_name}.rawCount.xls.*.edgeR.DE_results \
         output_dir/${group_name}.rawCount.xls ${group_name}.sigDiff.xls \
         ${group_name}.sigDiff.glist
-        perl /DG/home/yut/bin/lncRNA_bin/network/string.network.pl 7955 output_dir/${group_name}.sigDiff.xls 100 output_dir/ $group_name
+        perl $baseDir/bin/lncRNA_bin/network/string.network.pl 7955 output_dir/${group_name}.sigDiff.xls 100 output_dir/ $group_name
         
         
         printf 'ENSDARG00000099678\nENSDARG00000053864\nENSDARG00000061737' > ${group_name}.sigDiff.xls
@@ -353,7 +355,7 @@ process GO{
     """
         echo \$PWD
         awk '{print \$1"\t"\$2}' sigDiff.xls |grep -v 'GeneID' > ${group_name}.glist
-        perl /DG/home/yut/pipeline/RNA-seq/pipeline_2.0/functional/functional.pl -go -glist ${group_name}.glist \
+        perl $baseDir/bin/functional.pl -go -glist ${group_name}.glist \
         -sdir $database/GO -species hg19 
     """
 }
@@ -368,7 +370,7 @@ output:  file otp/KEGG/group_name/${group_name}.sigdiff.kobas.annot val KEGG_fil
 process KEGG{
     tag { group_name }
     //container "biocontainers/biocontainers "
-    conda "kobas=3.0.3"
+    conda "kobas=3.0.3 blast=2.7.1"
     publishDir { "output/KEGG/"+ group_name }
     input:
         set group_name , file('sigDiff.xls') from sigDiff_xls1
@@ -382,8 +384,8 @@ process KEGG{
         awk '{print \$1}' sigDiff.xls |grep -v 'GeneID' > ${group_name}.sigdiff.kobas.glist
 
         kobas-annotate -i ${group_name}.sigdiff.kobas.glist \
-        -t id:ensembl -s dre -y /DG/database/pub/KOBAS/3.0/seq_pep -q /DG/database/pub/KOBAS/3.0/sqlite3/ \
-        -p /DG/programs/beta/rel/ncbi-blast-2.2.28+/bin/blastp -x /DG/programs/beta/rel/ncbi-blast-2.2.28+/bin/blastx \
+        -t id:ensembl -s dre -y ${database_kobas}/3.0/seq_pep -q ${database_kobas}/3.0/sqlite3/ \
+        -p blastp -x blastx \
         -o ${group_name}.sigdiff.kobas.annot -n 4
     """
 }

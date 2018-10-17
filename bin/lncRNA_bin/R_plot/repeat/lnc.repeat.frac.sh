@@ -1,0 +1,3 @@
+perl /DG/home/yut/bin/lncRNA_bin/gtf2exon.bed.pl /DG/home/yut/database/hg19/gencode.v19.long_noncoding_RNAs.gtf /DG/project/yut/rat_ncRNA/repeat_content/coverage/gencode.v19.long_noncoding_RNAs.exon.bed
+/DG/home/yut/soft/bedtools-2.17.0/bin/coverageBed -s -a /DG/home/yut/database/hg19/hg19_rmsk.bed -b /DG/project/yut/rat_ncRNA/repeat_content/coverage/gencode.v19.long_noncoding_RNAs.exon.bed >/DG/project/yut/rat_ncRNA/repeat_content/coverage/gencode.v19.long_noncoding_RNAs.exon.repeat.cov
+perl /DG/project/yut/rat_ncRNA/repeat_content/coverage/getfrac.pl /DG/project/yut/rat_ncRNA/repeat_content/coverage/gencode.v19.long_noncoding_RNAs.exon.repeat.cov /DG/project/yut/rat_ncRNA/repeat_content/coverage/gencode.v19.long_noncoding_RNAs.repeat.xls

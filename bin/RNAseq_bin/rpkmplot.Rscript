@@ -1,0 +1,43 @@
+vars.tmp <- commandArgs(T)
+vars <- vars.tmp[length(vars.tmp)]
+split.vars <- unlist(strsplit(vars,','))
+input =split.vars[1]
+out1=split.vars[2]
+out2=split.vars[3]
+out3=split.vars[4]
+out4=split.vars[5]
+
+rpkm <- read.delim(input,header=T)
+library(ggplot2)
+pdf(out1)
+d <- ggplot(rpkm,aes(log10(rpkm),fill=Sample))+
+	geom_density(alpha=0.2)+
+	labs(x='log10(RPKM)')
+d
+dev.off()
+
+png(out2)
+d <- ggplot(rpkm,aes(log10(rpkm),fill=Sample))+
+        geom_density(alpha=0.2)+
+        labs(x='log10(RPKM)')
+d
+dev.off()
+
+pdf(out3)
+d <- ggplot(rpkm,aes(Sample,log10(rpkm),fill=Sample))+
+        geom_boxplot(alpha=0.2)+
+        labs(x='Sample',y='log10(RPKM)')+
+        theme(axis.text.x=element_text(angle=45,size=9,face='bold'))
+d
+dev.off()
+
+png(out4)
+d <- ggplot(rpkm,aes(Sample,log10(rpkm),fill=Sample))+
+        geom_boxplot(alpha=0.2)+
+        labs(x='Sample',y='log10(RPKM)')+
+        theme(axis.text.x=element_text(angle=45,size=9,face='bold'))
+d
+dev.off()
+
+
+

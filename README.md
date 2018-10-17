@@ -57,24 +57,18 @@ nextflow 学习文档 https://www.nextflow.io/docs/latest/getstarted.html
       - defaults
     show_channel_urls: true
 
-####配置nfs
+####配置数据库
     
-
-    yum install nfs-utils -y
-    mkdir -p  /DG/home/ /DG/project0 /DG/rawdata  /DG/project1 /DG/programs /DG/database
-
-/etc/fstab 写入一下内容
-
-    172.16.0.51:/home         /DG/home/       nfs4     defaults  0       0
-    172.16.0.51:/data1        /DG/project0    nfs4     defaults  0       0
-    172.16.0.51:/rawdata      /DG/rawdata     nfs4     defaults  0       0
-    172.16.0.51:/project1     /DG/project1    nfs4     defaults  0       0
-    172.16.0.51:/backup     /DG/backup      nfs4    defaults        0       0
-    172.16.0.51:/programs   /DG/programs    nfs4    defaults        0       0
-    172.16.0.51:/database2 /DG/database     nfs4    defaults        0       0
+    此流程依赖两个数据库目录：hg19和kobas
+    两个数据库默认位置分别为：
+    /DG/database/genomes/Homo_sapiens/hg19
+    /DG/database/pub/KOBAS/
+    可以通过 命令行参数或者创建同目录名的软连接方式。
 
 
-####配置ldap
+
+
+####配置ldap，本地测试可省略，主要用于集群运行
 
     yum install -y nss-pam* 
     authconfig-tui
@@ -101,7 +95,7 @@ nextflow 学习文档 https://www.nextflow.io/docs/latest/getstarted.html
     Server: ldap://172.16.0.210_
     Base DN: dc=dg,dc=com
 
-####安装pbs mom
+####安装pbs mom  本地测试可省略，主要用于集群运行
     echo /usr/local/lib > /etc/ld.so.conf.d/local.conf
     ldconfig
     sh torque-package-mom-linux-x86_64.sh
@@ -116,17 +110,23 @@ nextflow 学习文档 https://www.nextflow.io/docs/latest/getstarted.html
 
 1. Run
 
+    测试运行，可以直接执行：
+    nextflow run dggene/lncRNA
 
+    本地运行需要提供data.ini配置文件
     nextflow run dggene/lncRNA --data-file=xxxx/data.ini
+
+    带数据库参数方式运行：
+    nextflow run dggene/lncRNA --data-file=xxxx/data.ini --database={hg19数据库路径} --database_kobas={kobas数据库路径}
 
 Example data.ini
 
     [sample]
-    HL=HL.left.fq.gz|HL.right.fq.gz
-    
+    HL = HL.left.fq.gz|HL.right.fq.gz
+    HL_1 = HL_1.left.fq.gz|HL_1.right.fq.gz
+
     [group]
-    group1=sample1,sample2
-    group2=sample2,sample3
+    group1 = HL,HL_1
   
 数据配置文件为标准的ini格式，其中sample分组表示需要分析的样本信息，格式为 name=path1|path2,name为样本名称，path为样本路径
 ，路径可以是绝对路径也可以相对路径，如果是相对路径，则是相对于data.ini文件的路径

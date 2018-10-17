@@ -1,0 +1,3 @@
+perl /DG/home/yut/bin/lncRNA_bin/gtf2exon.bed.pl /DG/home/yut/database/hg19/hg19.GRCh37.74.protein_coding.gtf /DG/project/yut/rat_ncRNA/repeat_content/coverage/hg19.GRCh37.74.protein_coding.exon.bed
+/DG/home/yut/soft/bedtools-2.17.0/bin/coverageBed -s -a /DG/home/yut/database/hg19/hg19_rmsk.bed -b /DG/project/yut/rat_ncRNA/repeat_content/coverage/hg19.GRCh37.74.protein_coding.exon.bed >/DG/project/yut/rat_ncRNA/repeat_content/coverage/hg19.GRCh37.74.protein_coding.exon.repeat.cov
+perl /DG/project/yut/rat_ncRNA/repeat_content/coverage/getfrac.pl /DG/project/yut/rat_ncRNA/repeat_content/coverage/hg19.GRCh37.74.protein_coding.exon.repeat.cov /DG/project/yut/rat_ncRNA/repeat_content/coverage/hg19.GRCh37.74.protein_coding.repeat.xls
